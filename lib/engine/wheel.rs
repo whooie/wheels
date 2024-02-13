@@ -58,7 +58,10 @@ impl Wheel {
             5 => Self::Hammer(1),
             6 => Self::Diamond(2, true),
             7 => Self::Hammer(1),
-            _ => unreachable!(),
+            _ => {
+                eprintln!("Wheel::w0_sides");
+                unreachable!()
+            },
         }
     }
 
@@ -73,7 +76,10 @@ impl Wheel {
             5 => Self::Hammer(1),
             6 => Self::Diamond(2, false),
             7 => Self::Hammer(2),
-            _ => unreachable!(),
+            _ => {
+                eprintln!("Wheel::w1_sides");
+                unreachable!()
+            },
         }
     }
 
@@ -88,7 +94,10 @@ impl Wheel {
             5 => Self::Hammer(2),
             6 => Self::Diamond(2, false),
             7 => Self::Hammer(2),
-            _ => unreachable!(),
+            _ => {
+                eprintln!("Wheel::w2_sides");
+                unreachable!()
+            },
         }
     }
 
@@ -103,7 +112,10 @@ impl Wheel {
             5 => Self::Square(1, false),
             6 => Self::Diamond(1, true),
             7 => Self::Hammer(2),
-            _ => unreachable!(),
+            _ => {
+                eprintln!("Wheel::w3_sides");
+                unreachable!()
+            },
         }
     }
 
@@ -118,7 +130,10 @@ impl Wheel {
             5 => Self::Square(2, true),
             6 => Self::Diamond(1, false),
             7 => Self::Hammer(2),
-            _ => unreachable!(),
+            _ => {
+                eprintln!("Wheel::w4_sides");
+                unreachable!()
+            },
         }
     }
 

@@ -1,4 +1,8 @@
-use std::io;
+use std::{
+    thread,
+    time,
+    io,
+};
 use rand::{ prelude::thread_rng };
 use crate::{
     print_flush,
@@ -88,7 +92,7 @@ impl Action {
                 }
             },
             Self::BulwarkUp(player, inc) => {
-                format!("{}'s bulwark is increased by {}", player, inc)
+                format!("{}'s bulwark increases by {}", player, inc)
             },
             Self::EnergyAdd(player, hero, energy) => {
                 format!("{}'s {:?} gains {} energy", player, hero, energy)
@@ -468,12 +472,12 @@ impl Game {
             log.push(Action::ExpUp(id.clone(), hero_kind, inc));
             if hero.exp_inc(inc) {
                 if hero.level_inc() {
+                    log.push(Action::LevelUp(id, hero_kind, LevelUpKind::Max));
+                    Bomb::Yes
+                } else {
                     log.push(Action::LevelUp(
                         id, hero_kind, LevelUpKind::Up(hero.get_level())));
                     Bomb::No
-                } else {
-                    log.push(Action::LevelUp(id, hero_kind, LevelUpKind::Max));
-                    Bomb::Yes
                 }
             } else {
                 Bomb::No
@@ -496,13 +500,12 @@ impl Game {
             .map(|(hero, _)| {
                 if inc > 0 && hero.exp_inc(inc) {
                     if hero.level_inc() {
+                        log.push(Action::LevelUp(id, kind, LevelUpKind::Max));
+                        Bomb::Yes
+                    } else {
                         log.push(Action::LevelUp(
                             id, kind, LevelUpKind::Up(hero.get_level())));
                         Bomb::No
-                    } else {
-                        log.push(Action::LevelUp(
-                            id, kind, LevelUpKind::Max));
-                        Bomb::Yes
                     }
                 } else {
                     Bomb::No
@@ -573,7 +576,6 @@ impl Game {
                 log.push(Action::AssassinDelay(
                     id.clone(), id_opp, target_kind, delay));
                 target.energy_dec(delay);
-                target.set_act(false);
                 // +2 EXP from acting
                 (player, pos, self.do_exp_level(player, pos, 2, log))
             })
@@ -919,9 +921,12 @@ impl Game {
         -> impl Iterator<Item = Result<usize, String>> + '_
     {
         input.split(',')
+            .filter_map(|sp| {
+                let trimmed = sp.trim();
+                (!trimmed.is_empty()).then_some(trimmed)
+            })
             .map(|k_str| {
-                k_str.trim()
-                    .parse::<usize>()
+                k_str.parse::<usize>()
                     .map_err(|_| {
                         format!("failed to parse input '{}'", k_str.trim())
                     })
@@ -936,6 +941,7 @@ impl Game {
     }
 
     fn get_rolls_response(&self, rolls: &Rolls, locks: &mut [bool; 5]) {
+        locks.iter_mut().for_each(|lock| { *lock = false; });
         Self::display_rolls(rolls);
         let mut input: String;
         let mut lock_numbers: Result<Vec<usize>, String>;
@@ -965,6 +971,7 @@ impl Game {
     }
 
     fn get_rolls_response_cpu(&self, rolls: &Rolls, locks: &mut [bool; 5]) {
+        locks.iter_mut().for_each(|lock| { *lock = false; });
         let plr = self.get_player(PlayerPos::P2);
         let energy_left_l = plr.get_hero(HeroPos::L).get_energy_left();
         let energy_left_r = plr.get_hero(HeroPos::R).get_energy_left();
@@ -994,17 +1001,23 @@ impl Game {
         let mut p2_locks = [false; 5];
         if turn_counter % 2 == 1 {
             println_flush!("Player 1:");
+            sleep(500);
             self.get_rolls_response(&p1_rolls, &mut p1_locks);
             Wheel::gen_rolls_locked(&mut p1_rolls, &p1_locks, &mut rng);
+            sleep(500);
             self.get_rolls_response(&p1_rolls, &mut p1_locks);
             Wheel::gen_rolls_locked(&mut p1_rolls, &p1_locks, &mut rng);
+            sleep(500);
             Self::display_rolls(&p1_rolls);
         } else {
             println_flush!("Player 2:");
+            sleep(500);
             self.get_rolls_response(&p2_rolls, &mut p2_locks);
             Wheel::gen_rolls_locked(&mut p2_rolls, &p2_locks, &mut rng);
+            sleep(500);
             self.get_rolls_response(&p2_rolls, &mut p2_locks);
             Wheel::gen_rolls_locked(&mut p2_rolls, &p2_locks, &mut rng);
+            sleep(500);
             Self::display_rolls(&p2_rolls);
         }
         (p1_rolls, p2_rolls)
@@ -1077,14 +1090,15 @@ impl Game {
             w=TEXTW - 14,
         );
         println_flush!("│   EXP: {} / {max:<w$} ││   EXP: {} / {max:<w$} │",
-            p1r.get_energy(), p2r.get_energy(), max=MAX_EXP, w=TEXTW - 11);
+            p1r.get_exp(), p2r.get_exp(), max=MAX_EXP, w=TEXTW - 11);
         println_flush!("│   Level: {} / {max:<w$} ││   Level: {} / {max:<w$} │",
-            p1r.get_energy(), p2r.get_energy(), max=MAX_LEVEL, w=TEXTW - 13);
+            p1r.get_level(), p2r.get_level(), max=MAX_LEVEL, w=TEXTW - 13);
         println_flush!("└{bot}┘└{bot}┘", bot="─".repeat(TEXTW + 2));
     }
 
     fn display_log(&self, log: TurnLog) {
         for action in log.iter() {
+            sleep(500);
             println_flush!("> {}", action.msg());
         }
     }
@@ -1120,6 +1134,7 @@ impl Game {
             self.display_board();
             p1_rolls = self.get_rolls_single();
             p2_rolls = self.get_rolls_cpu();
+            sleep(1000);
             println_flush!("CPU's rolls:");
             Self::display_rolls(&p2_rolls);
             match self.do_turn(&p1_rolls, &p2_rolls) {
@@ -1134,5 +1149,9 @@ impl Game {
             }
         }
     }
+}
+
+fn sleep(ms: u64) {
+    thread::sleep(time::Duration::from_millis(ms));
 }
 

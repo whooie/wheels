@@ -265,8 +265,8 @@ impl Player {
                 => (&self.hero_l, HeroPos::L),
             (el, _, _, er, _, _) => {
                 match el.cmp(&er) {
-                    Ordering::Less => (&self.hero_l, HeroPos::L),
-                    Ordering::Greater => (&self.hero_r, HeroPos::R),
+                    Ordering::Greater => (&self.hero_l, HeroPos::L),
+                    Ordering::Less => (&self.hero_r, HeroPos::R),
                     Ordering::Equal => {
                         let mut rng = thread_rng();
                         if rng.gen::<bool>() {
@@ -294,8 +294,8 @@ impl Player {
                 => (&mut self.hero_l, HeroPos::L),
             (el, _, _, er, _, _) => {
                 match el.cmp(&er) {
-                    Ordering::Less => (&mut self.hero_l, HeroPos::L),
-                    Ordering::Greater => (&mut self.hero_r, HeroPos::R),
+                    Ordering::Greater => (&mut self.hero_l, HeroPos::L),
+                    Ordering::Less => (&mut self.hero_r, HeroPos::R),
                     Ordering::Equal => {
                         let mut rng = thread_rng();
                         if rng.gen::<bool>() {

@@ -376,7 +376,7 @@ impl Hero {
 
     pub fn level_inc(&mut self) -> bool {
         let level: &mut u8 = self.get_level_mut();
-        if *level <= MAX_LEVEL { *level += 1; false } else { true }
+        if *level < MAX_LEVEL { *level += 1; false } else { true }
     }
 
     pub fn exp_inc(&mut self, inc: u8) -> bool {
@@ -398,8 +398,15 @@ impl Hero {
     }
 
     pub fn energy_dec(&mut self, dec: u8) {
+        let act = self.get_act();
+        let rod_len = self.get_rod_len();
         let energy: &mut u8 = self.get_energy_mut();
-        *energy = energy.saturating_sub(dec);
+        if act && *energy == 0 {
+            *energy = rod_len.saturating_sub(dec);
+            self.set_act(false);
+        } else {
+            *energy = energy.saturating_sub(dec);
+        }
     }
 }
 
