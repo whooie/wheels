@@ -1,0 +1,23 @@
+[[bin]]
+path = "src/main.rs"
+name = "main"
+
+[package]
+name = "wheels"
+version = "0.1.0"
+authors = [ "whooie <wcwhuie@gmail.com>",]
+edition = "2021"
+
+[dependencies]
+rand = "0.8.5"
+# ratatui = "*"
+# thiserror = "*"
+# anyhow = "*"
+
+[lib]
+path = "lib/lib.rs"
+name = "wheels"
+
+[profile.release]
+lto = true
+panic = "abort"
