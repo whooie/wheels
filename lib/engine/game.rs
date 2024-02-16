@@ -1051,7 +1051,8 @@ impl Game {
         let turn_str_len = turn_str.len() + 2;
         let left: usize = (DISPW - turn_str_len) / 2;
         let right: usize = DISPW - left - turn_str_len;
-        println_flush!("{} {} {}", "-".repeat(left), turn_str, "-".repeat(right));
+        println_flush!("{} {} {}",
+            "=".repeat(left), turn_str, "=".repeat(right));
     }
 
     fn display_board(&self) {
@@ -1130,13 +1131,15 @@ impl Game {
         let mut p2_rolls: Rolls;
         loop {
             turn_counter += 1;
+            println_flush!();
             self.display_turn(turn_counter);
             self.display_board();
             p1_rolls = self.get_rolls_single();
             p2_rolls = self.get_rolls_cpu();
             sleep(1000);
-            println_flush!("CPU's rolls:");
+            println_flush!("\nCPU's rolls:");
             Self::display_rolls(&p2_rolls);
+            println_flush!();
             match self.do_turn(&p1_rolls, &p2_rolls) {
                 (Some(winner), turn_log) => {
                     self.display_log(turn_log);
